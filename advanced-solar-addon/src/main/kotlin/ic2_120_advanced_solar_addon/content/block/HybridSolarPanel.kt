@@ -111,7 +111,7 @@ open class HybridSolarPanelBlock : MachineBlock() {
 
 @ModBlockEntity(block = HybridSolarPanelBlock::class)
 class HybridSolarPanelBlockEntity(pos: BlockPos, state: BlockState) :
-    SolarPanelBlockEntity(HybridSolarPanelBlockEntity::class.type(), pos, state, dayPower = 64, nightPower = 8, maxStorage = 100000, tier = 2, activeProperty = HybridSolarPanelBlock.ACTIVE) {
+    SolarPanelForgeBridgeBlockEntity(HybridSolarPanelBlockEntity::class.type(), pos, state, dayPower = 64, nightPower = 8, maxStorage = 100000, tier = 2, activeProperty = HybridSolarPanelBlock.ACTIVE) {
 
     override fun getBlockName(): String = "hybrid_solar_panel"
 }

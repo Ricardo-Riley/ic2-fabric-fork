@@ -247,7 +247,13 @@ abstract class SolarPanelBlockEntity(
 
     override fun getDisplayName(): Text = Text.translatable("block.ic2_120_advanced_solar_addon.${getBlockName()}")
 
-    override fun createMenu(syncId: Int, playerInventory: PlayerInventory, player: PlayerEntity?): ScreenHandler =
+    /**
+     * 构造面板 ScreenHandler 的唯一入口。
+     *
+     * 供本类的 [createMenu] 与 [SolarPanelForgeBridgeBlockEntity] 的 SRG 兼容桥共用；
+     * 方法名不参与任何映射，避免 Connector 重映射时被改名。
+     */
+    protected fun createSolarPanelScreenHandler(syncId: Int, playerInventory: PlayerInventory): ScreenHandler =
         SolarPanelScreenHandler(
             syncId, playerInventory,
             ScreenHandlerContext.create(world!!, pos),
@@ -255,6 +261,9 @@ abstract class SolarPanelBlockEntity(
             this, CHARGE_SLOTS, tier,
             itemStorage
         )
+
+    override fun createMenu(syncId: Int, playerInventory: PlayerInventory, player: PlayerEntity?): ScreenHandler =
+        createSolarPanelScreenHandler(syncId, playerInventory)
 
     override fun writeScreenOpeningData(player: ServerPlayerEntity, buf: PacketByteBuf) {
         buf.writeBlockPos(pos)

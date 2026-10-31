@@ -76,3 +76,23 @@ world.getBlockState(neighborPos)
 - 本项目案例：
   - `MTRecipes`：锡锭→银锭等引用 core 物品的配方被静默丢弃。已修复：`IC2AdvancedSolarAddon` 改在 `SERVER_STARTING` 调 `MTRecipes.init()`，`MTRecipes.addRecipe` 丢弃时 WARN。
   - 已排查安全（同机机制但无此问题）：`UuCostIndex`（SERVER_STARTED 重建 + 未注册跳过日志）、`UuTemplateData`（字符串 ID + 惰性解析 + AIR 守卫）、各 BlockEntity 的 `by lazy` 物品字段、运行时 handler（扳手/割胶/掉落）、datagen provider（仅 datagen 环境）、JEI/Jade 插件（客户端运行时）。tlm-ic2-addon 与 chemical-addon 仓库无同类模式。
+
+## 4. Connector 重映射可能漏掉 `createMenu → m_7208_`，兼容桥禁止放进声明 `createMenu` 的类
+
+- 现象：
+  - 原生 Fabric 正常；Forge + Sinytra Connector 下右键太阳能板，集成服务端崩溃：
+    `AbstractMethodError: Receiver class ...AdvancedSolarPanelBlockEntity does not define or inherit an implementation of the resolved method 'AbstractContainerMenu m_7208_(int, Inventory, Player)' of interface net.minecraft.world.MenuProvider`。
+- 根因：
+  - Connector（1.0.0-beta.49）把 Fabric 模组重映射到 SRG 时，依赖继承链把 `NamedScreenHandlerFactory#createMenu` 改名为 SRG 名 `m_7208_`。该改名**不是确定性的**：同一个 `.connector` 输出 jar 里的 `MolecularTransformerBlockEntity`、`QuantumGeneratorBlockEntity` 都成功，core 中 60+ 个屏幕 BE 也都成功，唯独 `SolarPanelBlockEntity` 的方法仍叫 `createMenu`（描述符已是 SRG 类型）。
+  - 日志显示多个 jar 在 `pool-3-thread-*` 上并行转换；FART `EnhancedRemapper` 的继承映射传播会在构造 `MClass` 时回写共享的 `MMethod` 状态，属于时序相关的重映射缺陷，不是模组代码逻辑错误。
+- 修复方式（本项目约定）：
+  - 在**具体 BE 的共同基类**里显式声明 SRG 名方法：
+    `fun m_7208_(syncId: Int, playerInventory: PlayerInventory, player: PlayerEntity?): ScreenHandler`
+    原生 Fabric 不会调用它（仍走 `createMenu`）；Forge/Connector 下直接满足 `MenuProvider`。
+  - 桥方法**禁止**放进声明了 `createMenu` 的类本身：若 Connector 某次正常改名，同一类会出现两个同签名方法 → 类加载 `ClassFormatError`。必须用一个**不声明 `createMenu`** 的中间抽象基类承接。
+  - 本项目实现：`advanced-solar-addon/.../SolarPanelForgeBridgeBlockEntity.kt`，所有太阳能板具体 BE（含 industrial-upgrade 的普通/Rain/Sun 变体）经它继承。
+- 适用范围：
+  - 所有在 Forge/Connector 下需要打开 GUI 的 Fabric BlockEntity。其它模组无法由本项目覆盖，只能等上游修。
+- 备注：
+  - `m_7208_` 是 1.20.1 / Forge 47 的 SRG 名，属版本特定兼容代码；迁移 1.21.1/NeoForge 时需重新评估。
+  - 彻底修复需 Sinytra Connector；1.20.1 为 LTS，兼容性修复不一定会回流（见其 FAQ）。

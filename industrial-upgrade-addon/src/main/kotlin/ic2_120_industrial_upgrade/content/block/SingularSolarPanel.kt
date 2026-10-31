@@ -1,6 +1,6 @@
 package ic2_120_industrial_upgrade.content.block
 
-import ic2_120_advanced_solar_addon.content.block.SolarPanelBlockEntity
+import ic2_120_advanced_solar_addon.content.block.SolarPanelForgeBridgeBlockEntity
 import ic2_120.registry.CreativeTab
 import ic2_120.registry.annotation.ModBlock
 import ic2_120.registry.annotation.ModBlockEntity
@@ -52,7 +52,7 @@ class SingularSolarPanelBlock : IndustrialSolarPanelBlock() {
 }
 
 @ModBlockEntity(block = SingularSolarPanelBlock::class)
-class SingularSolarPanelBlockEntity(pos: BlockPos, state: BlockState) : SolarPanelBlockEntity(
+class SingularSolarPanelBlockEntity(pos: BlockPos, state: BlockState) : SolarPanelForgeBridgeBlockEntity(
     SingularSolarPanelBlockEntity::class.type(), pos, state,
     dayPower = 262144, nightPower = 131072, maxStorage = 10_000_000_000L, tier = 8,
     activeProperty = SOLAR_ACTIVE

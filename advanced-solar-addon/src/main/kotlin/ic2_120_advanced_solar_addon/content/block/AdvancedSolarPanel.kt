@@ -137,4 +137,4 @@ open class AdvancedSolarPanelBlock : MachineBlock() {
 
 @ModBlockEntity(block = AdvancedSolarPanelBlock::class)
 class AdvancedSolarPanelBlockEntity(pos: BlockPos, state: BlockState) :
-    SolarPanelBlockEntity(AdvancedSolarPanelBlockEntity::class.type(), pos, state, dayPower = 8, nightPower = 1, maxStorage = 32000, tier = 1, activeProperty = AdvancedSolarPanelBlock.ACTIVE)
+    SolarPanelForgeBridgeBlockEntity(AdvancedSolarPanelBlockEntity::class.type(), pos, state, dayPower = 8, nightPower = 1, maxStorage = 32000, tier = 1, activeProperty = AdvancedSolarPanelBlock.ACTIVE)

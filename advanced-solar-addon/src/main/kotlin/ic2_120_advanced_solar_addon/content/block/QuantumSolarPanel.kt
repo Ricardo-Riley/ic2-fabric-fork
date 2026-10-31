@@ -100,7 +100,7 @@ open class QuantumSolarPanelBlock : MachineBlock() {
 
 @ModBlockEntity(block = QuantumSolarPanelBlock::class)
 class QuantumSolarPanelBlockEntity(pos: BlockPos, state: BlockState) :
-    SolarPanelBlockEntity(QuantumSolarPanelBlockEntity::class.type(), pos, state, dayPower = 4096, nightPower = 2048, maxStorage = 10000000, tier = 5, activeProperty = QuantumSolarPanelBlock.ACTIVE) {
+    SolarPanelForgeBridgeBlockEntity(QuantumSolarPanelBlockEntity::class.type(), pos, state, dayPower = 4096, nightPower = 2048, maxStorage = 10000000, tier = 5, activeProperty = QuantumSolarPanelBlock.ACTIVE) {
 
     override fun getBlockName(): String = "quantum_solar_panel"
 }

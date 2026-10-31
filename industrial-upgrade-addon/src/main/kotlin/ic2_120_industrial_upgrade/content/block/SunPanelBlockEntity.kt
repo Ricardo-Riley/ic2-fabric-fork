@@ -1,7 +1,7 @@
 package ic2_120_industrial_upgrade.content.block
 
 import ic2_120_advanced_solar_addon.content.block.GenerationState
-import ic2_120_advanced_solar_addon.content.block.SolarPanelBlockEntity
+import ic2_120_advanced_solar_addon.content.block.SolarPanelForgeBridgeBlockEntity
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.state.property.BooleanProperty
@@ -27,7 +27,7 @@ abstract class SunPanelBlockEntity(
     /** 实际发电功率 = dayPower × 2。 */
     val sunPower: Int,
     activeProperty: BooleanProperty
-) : SolarPanelBlockEntity(
+) : SolarPanelForgeBridgeBlockEntity(
     type, pos, state,
     dayPower = sunPower, nightPower = 0,
     maxStorage = maxStorage, tier = tier,
