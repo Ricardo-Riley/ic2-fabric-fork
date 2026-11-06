@@ -442,7 +442,8 @@ slot == SLOT_SHEARS -> stack.item == Items.SHEARS
         EjectorUpgradeComponent.ejectIfUpgraded(world, pos, this, SLOT_UPGRADE_INDICES, SLOT_ITEM_OUTPUT_INDICES)
         PullingUpgradeComponent.pullIfUpgraded(world, pos, this, SLOT_UPGRADE_INDICES, SLOT_ITEM_INPUT_INDICES)
         if (fluidPipeReceiverEnabled) {
-            FluidPipeUpgradeComponent.pullFluidFromNeighbors(world, pos, waterTankInternal, fluidPipeReceiverFilter, fluidPipeReceiverSides, upgradeCount = fluidPipePullingCount)
+            // ioStorage.insert 按流体种类分流，使流体抽入升级同时覆盖水与除草剂两个输入罐。
+            FluidPipeUpgradeComponent.pullFluidFromNeighbors(world, pos, ioStorage, fluidPipeReceiverFilter, fluidPipeReceiverSides, upgradeCount = fluidPipePullingCount)
         }
         processWaterInputContainer()
         processWeedExInputContainer()

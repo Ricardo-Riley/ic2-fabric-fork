@@ -11,8 +11,9 @@ import ic2_120.content.syncs.SyncedData
 import ic2_120.content.energy.charge.BatteryDischargerComponent
 import ic2_120.content.item.EjectorUpgrade
 import ic2_120.content.item.PullingUpgrade
-import ic2_120.content.item.IUpgradeItem
 import ic2_120.content.item.RedstoneInverterUpgrade
+import ic2_120.content.item.EnergyStorageUpgrade
+import ic2_120.content.item.TransformerUpgrade
 import ic2_120.content.item.energy.IBatteryItem
 import ic2_120.content.storage.ItemInsertRoute
 import ic2_120.content.storage.RoutedItemStorage
@@ -101,7 +102,10 @@ class InductionFurnaceBlockEntity(
         maxCountPerStackProvider = { maxCountPerStack },
         slotValidator = { slot, stack -> isValid(slot, stack) },
         insertRoutes = listOf(
-            ItemInsertRoute(SLOT_UPGRADE_INDICES, matcher = { it.item is EjectorUpgrade || it.item is PullingUpgrade }),
+            ItemInsertRoute(SLOT_UPGRADE_INDICES, matcher = {
+                it.item is EjectorUpgrade || it.item is PullingUpgrade ||
+                    it.item is EnergyStorageUpgrade || it.item is TransformerUpgrade
+            }),
             ItemInsertRoute(SLOT_UPGRADE_INDICES, matcher = { it.item is RedstoneInverterUpgrade }),
             ItemInsertRoute(intArrayOf(SLOT_INPUT_0), matcher = { isSmeltingInput(it) }),
             ItemInsertRoute(intArrayOf(SLOT_INPUT_1), matcher = { isSmeltingInput(it) }),
@@ -161,7 +165,8 @@ class InductionFurnaceBlockEntity(
         SLOT_OUTPUT_0, SLOT_OUTPUT_1 -> false
         SLOT_DISCHARGING -> isBatteryItem(stack) || stack.item === Items.REDSTONE || stack.item is ic2_120.content.item.EnergiumDust
         SLOT_UPGRADE_0, SLOT_UPGRADE_1 -> stack.item is EjectorUpgrade || stack.item is PullingUpgrade
-            || stack.item is RedstoneInverterUpgrade
+            || stack.item is RedstoneInverterUpgrade || stack.item is EnergyStorageUpgrade
+            || stack.item is TransformerUpgrade
         else -> false
     }
 

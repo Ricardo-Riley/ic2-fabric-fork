@@ -129,7 +129,6 @@ class SteamKineticGeneratorScreen(
                 textRenderer,
                 listOf(
                     McText.translatable("gui.ic2_120.steam_kinetic_generator.uptips"),
-                    McText.literal("§7").append(McText.translatable("item.ic2_120.pulling_upgrade")),
                     McText.literal("§7").append(McText.translatable("item.ic2_120.fluid_ejector_upgrade")),
                     McText.literal("§7").append(McText.translatable("item.ic2_120.fluid_pulling_upgrade"))
                 ),

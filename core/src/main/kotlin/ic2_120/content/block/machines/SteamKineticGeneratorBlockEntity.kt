@@ -15,7 +15,6 @@ import ic2_120.content.storage.ItemInsertRoute
 import ic2_120.content.storage.RoutedItemStorage
 import ic2_120.content.storage.IRoutedSidedInventory
 import ic2_120.content.upgrade.FluidPipeUpgradeComponent
-import ic2_120.content.upgrade.IEjectorUpgradeSupport
 import ic2_120.content.upgrade.IFluidPipeUpgradeSupport
 import ic2_120.integration.ftbchunks.ClaimProtection
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory
@@ -66,7 +65,7 @@ class SteamKineticGeneratorBlockEntity(
     pos: BlockPos,
     state: BlockState
 ) : MachineBlockEntity(type, pos, state), IKineticMachinePort, Inventory, IRoutedSidedInventory,
-    IFluidPipeUpgradeSupport, IEjectorUpgradeSupport, ExtendedScreenHandlerFactory {
+    IFluidPipeUpgradeSupport, ExtendedScreenHandlerFactory {
 
     override val activeProperty: net.minecraft.state.property.BooleanProperty = SteamKineticGeneratorBlock.ACTIVE
     override val tier: Int = 3
@@ -389,6 +388,17 @@ class SteamKineticGeneratorBlockEntity(
 
     fun tick(world: World, pos: BlockPos, state: BlockState) {
         if (world.isClient) return
+
+        FluidPipeUpgradeComponent.apply(this, intArrayOf(SLOT_UPGRADE))
+        // 本机默认允许流体推拉；没有对应流体升级时维持基础速率 1，有升级时按数量/过滤/方向生效。
+        if (fluidPipeEjectorCount <= 0) {
+            fluidPipeProviderEnabled = true
+            fluidPipeEjectorCount = 1
+        }
+        if (fluidPipePullingCount <= 0) {
+            fluidPipeReceiverEnabled = true
+            fluidPipePullingCount = 1
+        }
 
         // 流体管道输入蒸汽
         if (fluidPipeReceiverEnabled) {

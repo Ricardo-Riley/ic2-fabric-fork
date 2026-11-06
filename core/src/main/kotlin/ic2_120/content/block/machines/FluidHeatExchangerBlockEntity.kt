@@ -20,6 +20,7 @@ import ic2_120.content.sync.HeatFlowSync
 import ic2_120.content.syncs.SyncedData
 import ic2_120.content.upgrade.EjectorUpgradeComponent
 import ic2_120.content.upgrade.FluidPipeUpgradeComponent
+import ic2_120.content.upgrade.PullingUpgradeComponent
 import ic2_120.content.upgrade.IFluidPipeUpgradeSupport
 import ic2_120.registry.annotation.ModBlockEntity
 import ic2_120.registry.annotation.RegisterFluidStorage
@@ -521,6 +522,7 @@ class FluidHeatExchangerBlockEntity(
             FluidPipeUpgradeComponent.pullFluidFromNeighbors(world, pos, inputTankInternal, fluidPipeReceiverFilter, fluidPipeReceiverSides, upgradeCount = fluidPipePullingCount)
         }
         EjectorUpgradeComponent.ejectIfUpgraded(world, pos, this, SLOT_UPGRADE_INDICES, SLOT_OUTPUT_INDICES)
+        PullingUpgradeComponent.pullIfUpgraded(world, pos, this, SLOT_UPGRADE_INDICES, SLOT_INPUT_INDICES)
         handleInputFluidContainers()
         fillOutputFluidContainers()
         tickHeatMachine(world, pos, state)

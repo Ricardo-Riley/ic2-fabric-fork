@@ -44,6 +44,7 @@ import ic2_120.content.upgrade.IFluidPipeUpgradeSupport
 import ic2_120.content.upgrade.IOverclockerUpgradeSupport
 import ic2_120.content.upgrade.ITransformerUpgradeSupport
 import ic2_120.content.upgrade.OverclockerUpgradeComponent
+import ic2_120.content.upgrade.PullingUpgradeComponent
 import ic2_120.content.upgrade.TransformerUpgradeComponent
 import ic2_120.integration.ftbchunks.ClaimProtection
 import ic2_120.registry.annotation.ModBlockEntity
@@ -326,8 +327,15 @@ abstract class BaseMinerBlockEntity(
             // 弹出升级不依赖挖掘动作：罢工/回收/闲置时也持续弹出产物与流体 (#26)
             world?.let { w ->
                 EjectorUpgradeComponent.ejectIfUpgraded(w, pos, this, SLOT_UPGRADE_INDICES, SLOT_ITEM_INDICES)
+                PullingUpgradeComponent.pullIfUpgraded(
+                    w, pos, this, SLOT_UPGRADE_INDICES,
+                    intArrayOf(SLOT_SCANNER, SLOT_DRILL, SLOT_PIPE)
+                )
                 if (fluidPipeProviderEnabled) {
                     FluidPipeUpgradeComponent.ejectFluidToNeighbors(w, pos, fluidTankInternal, fluidPipeProviderFilter, fluidPipeProviderSides, upgradeCount = fluidPipeEjectorCount)
+                }
+                if (fluidPipeReceiverEnabled) {
+                    FluidPipeUpgradeComponent.pullFluidFromNeighbors(w, pos, fluidTankInternal, fluidPipeReceiverFilter, fluidPipeReceiverSides, upgradeCount = fluidPipePullingCount)
                 }
             }
         }

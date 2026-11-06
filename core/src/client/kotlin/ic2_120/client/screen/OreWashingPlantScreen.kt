@@ -178,6 +178,7 @@ class OreWashingPlantScreen(
                     Text.literal("§7").append(Text.translatable("item.ic2_120.transformer_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.energy_storage_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.ejector_upgrade")),
+                    Text.literal("§7").append(Text.translatable("item.ic2_120.pulling_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.fluid_ejector_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.fluid_pulling_upgrade"))
                 ),

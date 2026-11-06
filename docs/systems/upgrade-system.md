@@ -235,6 +235,22 @@ for (i in 0 until UpgradeSlotLayout.SLOT_COUNT) {
 - 仅允许放入在 `UpgradeItemRegistry` 中注册的升级
 - 仅当机器实现了该升级对应的接口时才允许放入
 
+### 6. 必须把升级槽加入 insertRoutes
+
+`PredicateSlot` 的 `canInsert` 由 `RoutedItemStorage.deriveSlotSpec` 生成：**槽位必须被至少一条 `insertRoutes` 覆盖**，否则 `canInsert` 恒为 `false`，手工放入、Shift-click 和管道插入都会被服务端拒绝。
+
+```kotlin
+insertRoutes = listOf(
+    ItemInsertRoute(SLOT_UPGRADE_INDICES, matcher = { it.item is IUpgradeItem }),
+    // ... 其他输入路由
+)
+```
+
+注意：
+- `BlockEntity.isValid` 返回 `true` 不代表 GUI 能放入；`deriveSlotSpec` 以 routes 为准（两层规则必须同时满足）。
+- 客户端自动创建的 ScreenHandler 没有 `itemStorage`，会退化为宽松的 `SlotSpec()`；只有服务端 handler 持有真实 storage，因此会出现"客户端能拖上去、服务端拒绝回滚"的现象。
+- GUI tooltip 的可支持升级列表是**手写**的，不会自动跟随 BE 能力；新增/移除升级时同步修改对应 Screen。
+
 ---
 
 ## 升级槽布局

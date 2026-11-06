@@ -96,3 +96,23 @@ world.getBlockState(neighborPos)
 - 备注：
   - `m_7208_` 是 1.20.1 / Forge 47 的 SRG 名，属版本特定兼容代码；迁移 1.21.1/NeoForge 时需重新评估。
   - 彻底修复需 Sinytra Connector；1.20.1 为 LTS，兼容性修复不一定会回流（见其 FAQ）。
+
+## 5. 升级槽未加入 insertRoutes，导致 GUI/管道全部拒收
+
+- 现象：
+  - GUI 的提示说明里写着支持某升级，但把升级拖到升级格后物品弹回；Shift-click 也不进。
+  - 客户端看起来能先放上去，随后被服务端回滚，容易误判成“客户端渲染 bug”。
+- 根因：
+  - ScreenHandler 的 `PredicateSlot.canInsert` 来自 `RoutedItemStorage.deriveSlotSpec`：槽位必须被至少一条 `insertRoutes` 覆盖，否则 `canInsert` 恒为 `false`。
+  - `BlockEntity.isValid` 只校验物品类型，不参与 `PredicateSlot` 的放入判断；两层规则不一致时，`isValid` 的“允许”会被 routes 的“禁止”覆盖。
+  - 客户端自动创建的 ScreenHandler 没有 `itemStorage`，会退化为宽松的 `SlotSpec()`；只有服务端 handler 持有真实 storage，所以表现为“能拖上去但服务端拒绝”。
+  - 屏幕 tooltip 的可支持升级列表是手写列表，不会根据 BE 接口自动生成，容易与真实能力漂移。
+- 修复方式：
+  - 把升级槽加入 `insertRoutes`（例如 `ItemInsertRoute(SLOT_UPGRADE_INDICES, matcher = { it.item is IUpgradeItem })`）。
+  - 同步检查 Screen 的 uptips 列表是否与 BE 的接口/tick 调用一致。
+- 本项目案例（2026-11 全量审计）：
+  - `CropHarvesterBlockEntity` 的升级槽 15–18 不在 `insertRoutes` 中，导致提示里列出的储能/高压/弹出（以及未列出的超频）全部无法放入；已补 route。
+  - 补列：`Canner` / `FluidCanner` / `OreWashingPlant` 补物品抽入；`Centrifuge` / `Replicator` 补红石反转，`Replicator` 另补物品抽入；高级采矿机补储能；`MatterGenerator` 补红石反转、物品抽入、流体弹出；感应炉补储能/高压/红石并放开对应升级槽。
+  - 补实现：`FluidHeatExchanger` 补物品抽入；普通采矿机补物品/流体抽入；`Pump` 补流体抽入；`SteamKineticGenerator` 补流体升级应用（保留默认推拉）。
+  - 去掉未实现项：`MatterGenerator` 超频（`isValid` 明确拒绝）；`SteamKineticGenerator` 物品抽入（无物品输入/输出槽，同时移除 `IEjectorUpgradeSupport`）；`Cropmatron` / `Animalmatron` 流体弹出（输入罐 `canExtract=false`，升级无效）。
+  - 说明：部分机器仍按项目既有策略接受任意 `IUpgradeItem`，但 tooltip 只列实际生效项。

@@ -187,6 +187,7 @@ class CropmatronScreen(
         if (relX in UPTIPS_X until UPTIPS_X + UPTIPS_SIZE &&
             relY in UPTIPS_Y until UPTIPS_Y + UPTIPS_SIZE
         ) {
+            // 手写列表：必须与 CropmatronBlockEntity 的接口/tick 调用保持同步
             context.drawTooltip(
                 textRenderer,
                 listOf(
@@ -194,7 +195,8 @@ class CropmatronScreen(
                     Text.literal("§7").append(Text.translatable("item.ic2_120.overclocker_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.transformer_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.energy_storage_upgrade")),
-                    Text.literal("§7").append(Text.translatable("item.ic2_120.fluid_ejector_upgrade")),
+                    Text.literal("§7").append(Text.translatable("item.ic2_120.ejector_upgrade")),
+                    Text.literal("§7").append(Text.translatable("item.ic2_120.pulling_upgrade")),
                     Text.literal("§7").append(Text.translatable("item.ic2_120.fluid_pulling_upgrade"))
                 ),
                 mouseX, mouseY

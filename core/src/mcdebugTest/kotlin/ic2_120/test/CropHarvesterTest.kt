@@ -11,6 +11,8 @@ import com.mcdebug.runner.place
 import com.mcdebug.runner.setBlocks
 import com.mcdebug.runner.setBeField
 import com.mcdebug.runner.setSlot
+import ic2_120.content.block.machines.CropHarvesterBlockEntity
+import ic2_120.content.screen.CropHarvesterScreenHandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -264,5 +266,64 @@ class CropHarvesterTest {
         }
         assertEquals("3", getBlockProp(ctx, cropPos!!, "stage"), "未成熟作物不应被收割")
         assertSlotEmpty(ctx, ctx.origin, 0)
+    }
+
+    /**
+     * GUI 回归：升级槽必须能通过普通点击/Shift-click 放入。
+     *
+     * 修复前 CropHarvesterBlockEntity.itemStorage.insertRoutes 不包含升级槽 15–18，
+     * deriveSlotSpec 返回 canInsert=false，服务端会拒绝所有升级（不只是弹出升级）。
+     * 玩家快捷栏在 Handler 中的起始索引 = PLAYER_INV_START + 27。
+     */
+    @Test
+    fun `screen upgrade slots accept supported upgrades`(ctx: TestContext) {
+        setupHarvester(ctx)
+        val opened = ctx.api.screen.openBlock(ctx.origin, player = "fake").asJsonObject
+        val screenId = opened.get("screenId").asString
+        val hotbarHandlerStart = CropHarvesterScreenHandler.PLAYER_INV_START + 27
+        val upgrades = listOf(
+            "ic2_120:overclocker_upgrade",
+            "ic2_120:transformer_upgrade",
+            "ic2_120:energy_storage_upgrade",
+            "ic2_120:ejector_upgrade"
+        )
+
+        for ((i, item) in upgrades.withIndex()) {
+            ctx.api.screen.setPlayerSlot(screenId, i, mapOf("item" to item, "count" to 1))
+            val after = ctx.api.screen.quickMove(screenId, hotbarHandlerStart + i).asJsonObject
+            val slots = after.get("slots").asJsonArray
+            val upgradeSlot = CropHarvesterBlockEntity.SLOT_UPGRADE_0 + i
+            assertEquals(
+                item,
+                slots.get(upgradeSlot).asJsonObject.get("item").asString,
+                "upgrade $item should be routed into BE slot $upgradeSlot"
+            )
+            assertTrue(
+                slots.get(hotbarHandlerStart + i).asJsonObject.get("item").isJsonNull,
+                "player hotbar slot $i should be emptied after quick move"
+            )
+        }
+
+        ctx.api.screen.close(screenId)
+    }
+
+    /**
+     * 弹出升级效果：输出槽物品应被推入相邻容器。
+     * 这里用 setSlot 直接写升级槽，单独验证 tick 中的 EjectorUpgradeComponent 路径。
+     */
+    @Test
+    fun `ejector upgrade moves output to adjacent chest`(ctx: TestContext) {
+        setupHarvester(ctx)
+        val chestPos = ctx.pos(1, 0, 0)
+        ctx.api.world.setBlock(chestPos, "minecraft:chest")
+        setSlot(ctx, ctx.origin, CropHarvesterBlockEntity.SLOT_UPGRADE_0, "ic2_120:ejector_upgrade", 1)
+        setSlot(ctx, ctx.origin, CropHarvesterBlockEntity.SLOT_CONTENT_0, "minecraft:wheat", 1)
+
+        ctx.api.be.tick(ctx.origin, 1)
+
+        assertSlotEmpty(ctx, ctx.origin, CropHarvesterBlockEntity.SLOT_CONTENT_0)
+        val chestSlot = ctx.api.inv.getSlot(chestPos, 0).asJsonObject.get("slot").asJsonObject
+        assertEquals("minecraft:wheat", chestSlot.get("item").asString)
+        assertEquals(1, chestSlot.get("count").asInt)
     }
 }
